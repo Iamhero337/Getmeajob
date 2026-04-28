@@ -1,3 +1,6 @@
+# Personal config — credentials live here, never commit
+config.yaml
+
 venv/
 __pycache__/
 *.pyc
