@@ -1,0 +1,29 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.env
+
+# Database & cache
+data/jobs.db
+data/applications.log
+data/optimize_cache/
+
+# Generated outputs
+resumes/generated/
+resumes/*.pdf
+output/
+
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# LM Studio
+.lmstudio/

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Me a Job — Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d27;
+    --bg3: #22263a;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --muted: #7c87a6;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --card-radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Header */
+  header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--accent2); letter-spacing: -0.3px; }
+  header h1 span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  .header-actions { margin-left: auto; display: flex; gap: 8px; }
+  .btn { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { filter: brightness(1.1); }
+  .btn-red { background: #dc2626; color: #fff; }
+  .btn-red:hover { filter: brightness(1.1); }
+  .btn-yellow { background: var(--yellow); color: #000; }
+  .btn-yellow:hover { filter: brightness(1.1); }
+
+  /* Stats bar */
+  .stats-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; gap: 12px; flex-shrink: 0; }
+  .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 10px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 100px; cursor: pointer; transition: border-color .15s; }
+  .stat-card:hover, .stat-card.active { border-color: var(--accent); }
+  .stat-card.active .stat-num { color: var(--accent2); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--text); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.yellow { color: var(--yellow); }
+  .stat-num.blue { color: var(--blue); }
+  .stat-num.red { color: var(--red); }
+
+  /* Main layout */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Job list panel */
+  .list-panel { width: 100%; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); transition: width .2s; }
+  .list-panel.with-detail { width: 52%; }
+
+  /* Toolbar */
+  .toolbar { padding: 10px 16px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 180px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-size: 13px; outline: none; }
+  .search-box:focus { border-color: var(--accent); }
+  .filter-tabs { display: flex; gap: 4px; }
+  .filter-tab { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); font-size: 12px; cursor: pointer; transition: all .15s; }
+  .filter-tab:hover { color: var(--text); }
+  .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .result-count { color: var(--muted); font-size: 12px; margin-left: auto; white-space: nowrap; }
+
+  /* Job table */
+  .job-list { flex: 1; overflow-y: auto; }
+  .job-list::-webkit-scrollbar { width: 5px; }
+  .job-list::-webkit-scrollbar-track { background: var(--bg); }
+  .job-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { position: sticky; top: 0; background: var(--bg2); padding: 8px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+  thead th:hover { color: var(--text); }
+  tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody tr.selected { background: #1e1e3a; border-left: 2px solid var(--accent); }
+  td { padding: 9px 12px; vertical-align: middle; }
+  td.score { font-weight: 700; font-size: 15px; }
+  td.title { max-width: 220px; }
+  td.title .job-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  td.title .job-board { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  td.company { color: var(--muted); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-remote { background: #0d3321; color: var(--green); }
+  .badge-status { }
+  .badge-queued { background: #1a2a4a; color: var(--blue); }
+  .badge-applied { background: #0d3321; color: var(--green); }
+  .badge-skipped { background: #2a1a1a; color: var(--red); }
+  .badge-failed { background: #2a1a1a; color: var(--red); }
+  .badge-found { background: var(--bg3); color: var(--muted); }
+
+  /* Load more */
+  .load-more { padding: 12px; text-align: center; border-top: 1px solid var(--border); }
+
+  /* Detail panel */
+  .detail-panel { width: 48%; background: var(--bg2); display: flex; flex-direction: column; overflow: hidden; }
+  .detail-panel.hidden { display: none; }
+  .detail-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .detail-header h2 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .detail-meta { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .detail-meta .company-name { color: var(--muted); font-size: 13px; }
+  .detail-actions { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+  .detail-body { flex: 1; overflow-y: auto; padding: 0; }
+  .detail-body::-webkit-scrollbar { width: 4px; }
+  .detail-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Sections in detail */
+  .section { border-bottom: 1px solid var(--border); }
+  .section-header { padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: var(--bg2); }
+  .section-header:hover { background: var(--bg3); }
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 600; }
+  .section-toggle { color: var(--muted); font-size: 12px; }
+  .section-content { padding: 0; }
+
+  /* Cover letter text */
+  .cl-text { padding: 16px 20px; font-size: 13px; line-height: 1.7; color: #cbd5e1; white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; }
+
+  /* PDF iframe */
+  .pdf-frame { width: 100%; height: 480px; border: none; background: #fff; }
+
+  /* Tab switcher */
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 8px 16px; background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; font-weight: 500; }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Score colors */
+  .score-high { color: var(--green); }
+  .score-mid { color: var(--yellow); }
+  .score-low { color: var(--muted); }
+
+  /* Empty state */
+  .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
+  .empty h3 { font-size: 16px; margin-bottom: 8px; }
+
+  /* Spinner */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; animation: slideUp .2s ease; }
+  .toast-success { background: #15432a; color: var(--green); border: 1px solid #166534; }
+  .toast-error { background: #3f1515; color: #fca5a5; border: 1px solid #7f1d1d; }
+  @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* No files placeholder */
+  .no-file { padding: 20px; color: var(--muted); font-size: 13px; text-align: center; }
+
+  /* Detail close btn */
+  .close-detail { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; }
+  .close-detail:hover { color: var(--text); background: var(--bg3); }
+
+  .detail-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+  .applied-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .list-panel.with-detail { width: 0; overflow: hidden; }
+    .detail-panel { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Get Me a Job <span>Dashboard</span></h1>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat-card active" data-filter="all" onclick="setFilter('all', this)">
+    <div class="stat-label">Total Found</div>
+    <div class="stat-num" id="statTotal">—</div>
+  </div>
+  <div class="stat-card" data-filter="queued" onclick="setFilter('queued', this)">
+    <div class="stat-label">To Apply</div>
+    <div class="stat-num yellow" id="statQueued">—</div>
+  </div>
+  <div class="stat-card" data-filter="applied" onclick="setFilter('applied', this)">
+    <div class="stat-label">Applied</div>
+    <div class="stat-num green" id="statApplied">—</div>
+  </div>
+  <div class="stat-card" data-filter="skipped" onclick="setFilter('skipped', this)">
+    <div class="stat-label">Skipped</div>
+    <div class="stat-num red" id="statSkipped">—</div>
+  </div>
+  <div class="stat-card" data-filter="found" onclick="setFilter('found', this)">
+    <div class="stat-label">New</div>
+    <div class="stat-num blue" id="statNew">—</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Job list -->
+  <div class="list-panel" id="listPanel">
+    <div class="toolbar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all" onclick="setFilter('all', null)">All</button>
+        <button class="filter-tab" data-filter="queued" onclick="setFilter('queued', null)">To Apply</button>
+        <button class="filter-tab" data-filter="applied" onclick="setFilter('applied', null)">Applied</button>
+        <button class="filter-tab" data-filter="skipped" onclick="setFilter('skipped', null)">Skipped</button>
+        <button class="filter-tab" data-filter="found" onclick="setFilter('found', null)">New</button>
+      </div>
+      <input class="search-box" type="text" placeholder="Search title or company…" id="searchBox" oninput="onSearch()">
+      <span class="result-count" id="resultCount"></span>
+    </div>
+    <div class="job-list" id="jobList">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel hidden" id="detailPanel">
+    <div class="detail-header">
+      <div class="detail-title-row">
+        <div>
+          <h2 id="dTitle">—</h2>
+          <div class="detail-meta">
+            <span class="company-name" id="dCompany"></span>
+            <span class="badge" id="dRemote"></span>
+            <span id="dScore"></span>
+            <span class="badge" id="dBoard"></span>
+          </div>
+        </div>
+        <button class="close-detail" onclick="closeDetail()">✕</button>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <a id="dApplyLink" href="#" target="_blank" rel="noopener">
+        <button class="btn btn-primary">🔗 Open Job Page</button>
+      </a>
+      <button class="btn btn-green btn-sm" onclick="markStatus('applied')" id="btnApplied">✓ Mark Applied</button>
+      <button class="btn btn-ghost btn-sm" onclick="markStatus('queued')" id="btnQueued">↺ Reset to Queue</button>
+      <button class="btn btn-red btn-sm" onclick="markStatus('skipped')" id="btnSkip">✕ Skip</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- Resume section -->
+      <div class="section" id="sectionResume">
+        <div class="section-header" onclick="toggleSection('resumeContent')">
+          <span class="section-title">📄 Resume</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <a id="dResumeDownload" href="#" download style="font-size:12px;color:var(--accent2);text-decoration:none;">Download</a>
+            <span class="section-toggle" id="resumeToggle">▾</span>
+          </div>
+        </div>
+        <div class="section-content" id="resumeContent">
+          <div class="no-file" id="resumePlaceholder">No resume generated yet</div>
+          <iframe id="resumeFrame" class="pdf-frame" style="display:none;"></iframe>
+        </div>
+      </div>
+
+      <!-- Cover Letter section -->
+      <div class="section" id="sectionCover">
+        <div class="section-header" onclick="toggleSection('coverContent')">
+          <span class="section-title">✉ Cover Letter</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <a id="dCoverDownload" href="#" download style="font-size:12px;color:var(--accent2);text-decoration:none;">Download</a>
+            <span class="section-toggle" id="coverToggle">▾</span>
+          </div>
+        </div>
+        <div class="section-content" id="coverContent">
+          <div class="tab-bar">
+            <button class="tab-btn active" id="tabTxtBtn" onclick="showCoverTab('txt')">Text</button>
+            <button class="tab-btn" id="tabPdfBtn" onclick="showCoverTab('pdf')">PDF Preview</button>
+          </div>
+          <div class="tab-content active" id="tabTxt">
+            <div class="no-file" id="coverTxtPlaceholder">No cover letter generated yet</div>
+            <div class="cl-text" id="coverTxtContent" style="display:none;"></div>
+          </div>
+          <div class="tab-content" id="tabPdf">
+            <div class="no-file" id="coverPdfPlaceholder">No PDF generated yet</div>
+            <iframe id="coverFrame" class="pdf-frame" style="display:none;"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job info section -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('jobInfoContent')">
+          <span class="section-title">ℹ Job Details</span>
+          <span class="section-toggle" id="jobInfoToggle">▾</span>
+        </div>
+        <div class="section-content" id="jobInfoContent" style="padding:16px 20px;color:var(--muted);font-size:13px;line-height:1.8;">
+          <div><strong style="color:var(--text)">Location:</strong> <span id="dLocation"></span></div>
+          <div><strong style="color:var(--text)">Board:</strong> <span id="dBoardFull"></span></div>
+          <div><strong style="color:var(--text)">Found:</strong> <span id="dFoundAt"></span></div>
+          <div><strong style="color:var(--text)">Applied:</strong> <span id="dAppliedAt"></span></div>
+          <div><strong style="color:var(--text)">Notes:</strong> <span id="dNotes"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  let currentFilter = 'all';
+  let currentSearch = '';
+  let currentPage = 1;
+  let totalJobs = 0;
+  let allLoaded = false;
+  let selectedJobId = null;
+  let selectedJob = null;
+  let searchTimer = null;
+  let sectionStates = { resumeContent: true, coverContent: true, jobInfoContent: false };
+
+  // ─── Boot ─────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    loadJobs(true);
+    // Auto-refresh stats every 30s
+    setInterval(loadStats, 30000);
+  });
+
+  // ─── Data loading ─────────────────────────────────────────────────────────
+  async function loadStats() {
+    const r = await fetch('/api/stats');
+    const s = await r.json();
+    document.getElementById('statTotal').textContent = s.total_found ?? 0;
+    document.getElementById('statQueued').textContent = s.queued ?? 0;
+    document.getElementById('statApplied').textContent = s.applied ?? 0;
+    document.getElementById('statSkipped').textContent = s.skipped ?? 0;
+    document.getElementById('statNew').textContent = s.found ?? 0; // "found" status = new unseen
+  }
+
+  async function loadJobs(reset = false) {
+    if (reset) {
+      currentPage = 1;
+      allLoaded = false;
+      document.getElementById('jobList').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+    }
+    if (allLoaded) return;
+
+    const params = new URLSearchParams({
+      status: currentFilter,
+      search: currentSearch,
+      page: currentPage,
+      per_page: 50,
+    });
+    const r = await fetch('/api/jobs?' + params);
+    const data = await r.json();
+    totalJobs = data.total;
+    document.getElementById('resultCount').textContent = `${totalJobs} jobs`;
+
+    if (reset) {
+      document.getElementById('jobList').innerHTML = '';
+    } else {
+      document.getElementById('jobList').querySelector('.load-more')?.remove();
+    }
+
+    if (data.jobs.length === 0 && reset) {
+      document.getElementById('jobList').innerHTML = '<div class="empty"><h3>No jobs found</h3><p>Try a different filter or run the agent.</p></div>';
+      return;
+    }
+
+    const table = reset ? buildTable() : document.getElementById('jobTable');
+    const tbody = table.querySelector('tbody');
+    data.jobs.forEach(j => tbody.appendChild(buildRow(j)));
+
+    if (reset) document.getElementById('jobList').appendChild(table);
+
+    allLoaded = (currentPage * 50) >= totalJobs;
+    if (!allLoaded) {
+      const more = document.createElement('div');
+      more.className = 'load-more';
+      more.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="loadMore()">Load more</button>';
+      document.getElementById('jobList').appendChild(more);
+    }
+  }
+
+  function buildTable() {
+    const t = document.createElement('table');
+    t.id = 'jobTable';
+    t.innerHTML = `<thead><tr>
+      <th style="width:52px;">Score</th>
+      <th>Title</th>
+      <th style="width:140px;">Company</th>
+      <th style="width:65px;">Remote</th>
+      <th style="width:90px;">Status</th>
+    </tr></thead><tbody></tbody>`;
+    return t;
+  }
+
+  function buildRow(j) {
+    const tr = document.createElement('tr');
+    tr.dataset.jobId = j.id;
+    if (j.id === selectedJobId) tr.classList.add('selected');
+
+    const scoreClass = j.score >= 75 ? 'score-high' : j.score >= 60 ? 'score-mid' : 'score-low';
+    const statusBadge = `<span class="badge badge-${j.status}">${statusLabel(j.status)}</span>`;
+    const remoteBadge = j.is_remote ? '<span class="badge badge-remote">Remote</span>' : '';
+
+    tr.innerHTML = `
+      <td class="score"><span class="${scoreClass}">${Math.round(j.score)}</span></td>
+      <td class="title">
+        <span class="job-title" title="${esc(j.title)}">${esc(j.title)}</span>
+        <span class="job-board">${esc(j.board)}</span>
+      </td>
+      <td class="company" title="${esc(j.company)}">${esc(j.company)}</td>
+      <td>${remoteBadge}</td>
+      <td>${statusBadge}</td>
+    `;
+    tr.addEventListener('click', () => openDetail(j));
+    return tr;
+  }
+
+  function loadMore() {
+    currentPage++;
+    loadJobs(false);
+  }
+
+  // ─── Filters & search ─────────────────────────────────────────────────────
+  function setFilter(filter, cardEl) {
+    currentFilter = filter;
+    // Update stat cards
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+    // Update filter tabs
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === filter));
+    loadJobs(true);
+  }
+
+  function onSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentSearch = document.getElementById('searchBox').value.trim();
+      loadJobs(true);
+    }, 300);
+  }
+
+  function refreshAll() {
+    loadStats();
+    loadJobs(true);
+    toast('Refreshed', 'success');
+  }
+
+  // ─── Detail panel ─────────────────────────────────────────────────────────
+  function openDetail(job) {
+    selectedJobId = job.id;
+    selectedJob = job;
+    // Highlight row
+    document.querySelectorAll('#jobTable tbody tr').forEach(r =>
+      r.classList.toggle('selected', r.dataset.jobId === job.id)
+    );
+    document.getElementById('listPanel').classList.add('with-detail');
+    document.getElementById('detailPanel').classList.remove('hidden');
+
+    // Fill header
+    document.getElementById('dTitle').textContent = job.title;
+    document.getElementById('dCompany').textContent = job.company || '—';
+    document.getElementById('dRemote').textContent = job.is_remote ? 'Remote' : '';
+    document.getElementById('dRemote').className = 'badge ' + (job.is_remote ? 'badge-remote' : '');
+    const scoreClass = job.score >= 75 ? 'score-high' : job.score >= 60 ? 'score-mid' : 'score-low';
+    document.getElementById('dScore').innerHTML = `<span class="${scoreClass}" style="font-weight:700;font-size:15px;">${Math.round(job.score)}</span>`;
+    document.getElementById('dBoard').textContent = job.board;
+    document.getElementById('dBoard').className = 'badge badge-found';
+
+    // Apply link
+    document.getElementById('dApplyLink').href = job.url || '#';
+
+    // Status buttons
+    updateStatusButtons(job.status);
+
+    // Job info
+    document.getElementById('dLocation').textContent = job.location || '—';
+    document.getElementById('dBoardFull').textContent = job.board || '—';
+    document.getElementById('dFoundAt').textContent = job.found_at || '—';
+    document.getElementById('dAppliedAt').textContent = job.applied_at || 'Not yet';
+    document.getElementById('dNotes').textContent = job.notes || '—';
+
+    // Resume
+    loadResumeSection(job);
+
+    // Cover letter
+    loadCoverSection(job);
+  }
+
+  function closeDetail() {
+    document.getElementById('listPanel').classList.remove('with-detail');
+    document.getElementById('detailPanel').classList.add('hidden');
+    selectedJobId = null;
+    selectedJob = null;
+    document.querySelectorAll('#jobTable tbody tr').forEach(r => r.classList.remove('selected'));
+  }
+
+  function updateStatusButtons(status) {
+    document.getElementById('btnApplied').style.display = status === 'applied' ? 'none' : '';
+    document.getElementById('btnQueued').style.display = status === 'queued' ? 'none' : '';
+    document.getElementById('btnSkip').style.display = status === 'skipped' ? 'none' : '';
+  }
+
+  function loadResumeSection(job) {
+    const frame = document.getElementById('resumeFrame');
+    const placeholder = document.getElementById('resumePlaceholder');
+    const dl = document.getElementById('dResumeDownload');
+
+    if (job.resume_path) {
+      const url = '/files/abs?path=' + encodeURIComponent(job.resume_path);
+      frame.src = url;
+      frame.style.display = 'block';
+      placeholder.style.display = 'none';
+      dl.href = url;
+      dl.download = job.resume_path.split('/').pop();
+    } else {
+      frame.style.display = 'none';
+      frame.src = '';
+      placeholder.style.display = 'block';
+      dl.href = '#';
+    }
+  }
+
+  function loadCoverSection(job) {
+    // TXT
+    const txtEl = document.getElementById('coverTxtContent');
+    const txtPh = document.getElementById('coverTxtPlaceholder');
+    if (job.cover_letter_txt) {
+      fetch('/files/abs?path=' + encodeURIComponent(job.cover_letter_txt))
+        .then(r => r.text())
+        .then(text => {
+          txtEl.textContent = text;
+          txtEl.style.display = 'block';
+          txtPh.style.display = 'none';
+        })
+        .catch(() => { txtPh.style.display = 'block'; txtEl.style.display = 'none'; });
+    } else {
+      txtEl.style.display = 'none';
+      txtEl.textContent = '';
+      txtPh.style.display = 'block';
+    }
+
+    // PDF
+    const pdfFrame = document.getElementById('coverFrame');
+    const pdfPh = document.getElementById('coverPdfPlaceholder');
+    const dl = document.getElementById('dCoverDownload');
+    if (job.cover_letter_pdf) {
+      const url = '/files/abs?path=' + encodeURIComponent(job.cover_letter_pdf);
+      pdfFrame.src = url;
+      pdfFrame.style.display = 'block';
+      pdfPh.style.display = 'none';
+      dl.href = url;
+      dl.download = job.cover_letter_pdf.split('/').pop();
+    } else if (job.cover_letter_txt) {
+      const url = '/files/abs?path=' + encodeURIComponent(job.cover_letter_txt);
+      dl.href = url;
+      dl.download = job.cover_letter_txt.split('/').pop();
+      pdfFrame.style.display = 'none';
+      pdfPh.style.display = 'block';
+    } else {
+      pdfFrame.style.display = 'none';
+      pdfFrame.src = '';
+      pdfPh.style.display = 'block';
+      dl.href = '#';
+    }
+
+    // Default to TXT tab
+    showCoverTab('txt');
+  }
+
+  function showCoverTab(tab) {
+    document.getElementById('tabTxt').classList.toggle('active', tab === 'txt');
+    document.getElementById('tabPdf').classList.toggle('active', tab === 'pdf');
+    document.getElementById('tabTxtBtn').classList.toggle('active', tab === 'txt');
+    document.getElementById('tabPdfBtn').classList.toggle('active', tab === 'pdf');
+  }
+
+  function toggleSection(id) {
+    const el = document.getElementById(id);
+    const isOpen = el.style.display !== 'none';
+    el.style.display = isOpen ? 'none' : 'block';
+    const toggleId = id.replace('Content', 'Toggle');
+    const t = document.getElementById(toggleId);
+    if (t) t.textContent = isOpen ? '▸' : '▾';
+  }
+
+  // ─── Status update ────────────────────────────────────────────────────────
+  async function markStatus(newStatus) {
+    if (!selectedJobId) return;
+    const r = await fetch('/api/jobs/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job_id: selectedJobId, status: newStatus }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(`Marked as ${statusLabel(newStatus)}`, 'success');
+      // Update local job object
+      if (selectedJob) selectedJob.status = newStatus;
+      updateStatusButtons(newStatus);
+      // Update row badge in list
+      const row = document.querySelector(`tr[data-job-id="${selectedJobId}"]`);
+      if (row) {
+        const badge = row.querySelector('.badge');
+        if (badge) { badge.textContent = statusLabel(newStatus); badge.className = `badge badge-${newStatus}`; }
+      }
+      // Refresh stats
+      loadStats();
+    } else {
+      toast('Update failed', 'error');
+    }
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function statusLabel(s) {
+    const map = { queued: 'To Apply', applied: 'Applied', skipped: 'Skipped', failed: 'Failed', found: 'New' };
+    return map[s] || s;
+  }
+
+  function esc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // Infinite scroll
+  document.addEventListener('DOMContentLoaded', () => {
+    const list = document.getElementById('jobList');
+    list.addEventListener('scroll', () => {
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight - 80) {
+        if (!allLoaded) { currentPage++; loadJobs(false); }
+      }
+    });
+  });
+</script>
+</body>
+</html>

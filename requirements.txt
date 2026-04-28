@@ -1,0 +1,37 @@
+# Core
+openai>=1.0.0
+requests>=2.31.0
+aiohttp>=3.9.0
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+click>=8.1.0
+rich>=13.7.0
+schedule>=1.2.0
+
+# Browser automation (stealth apply)
+playwright>=1.40.0
+playwright-stealth>=1.0.6
+
+# Resume parsing
+pdfplumber>=0.10.0
+python-docx>=1.1.0
+PyPDF2>=3.0.0
+
+# Resume building (HTML → PDF)
+weasyprint>=60.0
+jinja2>=3.1.0
+
+# Scraping
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+fake-useragent>=1.4.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Web dashboard
+flask>=3.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+tenacity>=8.2.0
