@@ -1,0 +1,325 @@
+# ════════════════════════════════════════════════════════════════════════
+# GET ME A JOB — Configuration
+# ════════════════════════════════════════════════════════════════════════
+# Copy this file to config.yaml and fill in your details.
+#   cp config.example.yaml config.yaml
+#
+# config.yaml is gitignored — your credentials never leave your machine.
+# ════════════════════════════════════════════════════════════════════════
+
+
+# ─── LM Studio (local LLM) ──────────────────────────────────────────────
+# Recommended:  Qwen2.5-7B-Instruct-Q4_K_M  (~4.1GB VRAM, fast)
+# Alternative:  Llama-3.1-8B-Instruct-Q4_K_M  (~4.5GB VRAM)
+# Don't load 13B+ on a 6GB card — it'll crawl on CPU.
+lmstudio:
+  base_url: "http://localhost:1234/v1"
+  api_key: "lm-studio"          # LM Studio ignores this; openai SDK requires it
+  model: "auto"                 # "auto" picks the loaded model, or set exact name
+  temperature: 0.7
+  max_tokens: 3500
+
+
+# ─── Your Profile ───────────────────────────────────────────────────────
+candidate:
+  name: "Your Name"
+  email: "your@email.com"
+  phone: "+91XXXXXXXXXX"
+  linkedin_url: "https://www.linkedin.com/in/your-profile/"
+  github_url: "https://github.com/your-username"
+  location: "City, Country"
+  notice_period: "1 month"
+
+  # Salary range (in your currency, NOT in lakhs/k notation)
+  # ₹6L = 600000, ₹15L = 1500000
+  expected_salary_min: 600000
+  expected_salary_max: 1500000
+  currency: "INR"
+
+  # The optimizer will never claim more years than this.
+  total_experience: "X months at Company A + Y months at Company B"
+  max_years_to_claim: 2          # Auto-skips JDs that demand 5+ years
+
+  # Your STRONGEST 5-6 skills — optimizer leads with these, scorer rewards them.
+  top_skills:
+    - "Python"
+    - "Linux"
+    - "SQL"
+    - "Networking"
+    - "AI/ML"
+
+  # ─── Geo & visa preferences ───────────────────────────────────────────
+  # Remote roles always pass. Onsite rules:
+  #   onsite_fallback_countries  → always OK (no visa needed)
+  #   sponsor_required_countries → OK only if JD doesn't say "no sponsorship"
+  geo:
+    onsite_fallback_countries: ["india"]
+    sponsor_required_countries: ["united states", "usa", "us", "united kingdom", "uk",
+                                 "dubai", "uae", "germany", "netherlands", "ireland",
+                                 "france", "spain", "portugal", "poland", "sweden",
+                                 "denmark", "norway", "finland", "estonia"]
+
+
+# ─── Job Search Preferences ─────────────────────────────────────────────
+search:
+  keywords:
+    - "Python Developer"
+    - "Backend Developer"
+    - "Full Stack Developer"
+    - "Software Engineer"
+    - "AI Engineer"
+    - "ML Engineer"
+    - "Data Engineer"
+    - "DevOps Engineer"
+    - "SRE"
+    - "Linux Engineer"
+    - "Network Engineer"
+    - "SQL Developer"
+
+  prefer_remote: true
+  prefer_startups: true
+
+  blacklist_companies:
+    - "Your Current Employer"
+    # - "Cognizant"
+
+  # Drop jobs whose TITLE contains any of these (case-insensitive).
+  blacklist_keywords:
+    - "Senior"
+    - "Sr."
+    - "Staff"
+    - "Principal"
+    - "Lead"
+    - "Manager"
+    - "Director"
+    - "Architect"
+    - "Head of"
+    - "VP"
+    - "10+"
+    - "8+ years"
+    - "7+ years"
+    - "5+ years"
+
+  min_score_to_apply: 45
+  max_applications_per_run: 25
+  require_approval: false        # true = asks before applying each batch
+
+
+# ─── Job Boards (sorted: BEST → OK) ─────────────────────────────────────
+boards:
+
+  # ════ BEST: direct apply, low competition, no paywall ═════════════════
+
+  # ── LinkedIn ────────────────────────────────────────────────────────────
+  # HOW TO GET YOUR session_cookie (li_at):
+  #   1. Log into LinkedIn in Chrome / Brave / Firefox
+  #   2. Press F12 → Application tab → Cookies → https://www.linkedin.com
+  #   3. Find the cookie named "li_at" → copy its Value
+  #   4. Paste below. Re-paste every few weeks (cookies expire).
+  linkedin:
+    enabled: true
+    session_cookie: "PASTE_YOUR_li_at_COOKIE_HERE"
+    locations: ["Remote", "India", "Bangalore", "Hyderabad", "Pune", "Mumbai", "Delhi"]
+    date_posted: "past_week"  # past_day | past_week | past_month
+
+  # ── Greenhouse ──────────────────────────────────────────────────────────
+  # Public API — no login. HOW TO ADD A COMPANY:
+  #   boards.greenhouse.io/<SLUG> → copy the slug and append below.
+  greenhouse:
+    enabled: true
+    locations: ["remote", "india", "bangalore", "hyderabad", "pune", "mumbai", "delhi",
+                "united states", "uk", "germany", "netherlands", "dubai"]
+    companies:
+      # AI / ML
+      - "anthropic"
+      - "openai"
+      - "scaleai"
+      - "huggingface"
+      - "deepgram"
+      - "perplexityai"
+      - "cohere"
+      - "weightsandbiases"
+      - "modal"
+      - "anyscale"
+      # Dev infra / cloud
+      - "stripe"
+      - "github"
+      - "gitlab"
+      - "vercel"
+      - "netlify"
+      - "render"
+      - "supabase"
+      - "neon"
+      - "planetscale"
+      - "postman"
+      - "hashicorp"
+      - "datadog"
+      - "elastic"
+      - "confluent"
+      - "mongodb"
+      - "circleci"
+      - "sentry"
+      - "sourcegraph"
+      - "cloudflare"
+      - "fastly"
+      # Productivity / consumer SaaS
+      - "notion"
+      - "airtable"
+      - "linear"
+      - "figma"
+      - "miro"
+      - "grammarly"
+      - "asana"
+      - "loom"
+      - "retool"
+      - "canva"
+      # Fintech
+      - "robinhood"
+      - "plaid"
+      - "brex"
+      - "ramp"
+      - "mercury"
+      - "carta"
+      - "chime"
+      - "checkout"
+      # Marketplaces / consumer
+      - "airbnb"
+      - "doordash"
+      - "instacart"
+      - "lyft"
+      - "opendoor"
+      - "duolingo"
+      - "coursera"
+      - "discord"
+      - "reddit"
+      - "pinterest"
+      # Data / analytics
+      - "segment"
+      - "mixpanel"
+      - "amplitude"
+      - "snowflake"
+      - "databricks"
+      - "fivetran"
+      - "dbt"
+      # India-friendly remote
+      - "atlan"
+      - "razorpay"
+      - "zerodha"
+      - "groww"
+      - "cred"
+      - "swiggy"
+      - "meesho"
+      - "freshworks"
+      - "innovaccer"
+      # Add more — just paste the slug
+
+  # ── Lever ───────────────────────────────────────────────────────────────
+  # Public API — no login. jobs.lever.co/<SLUG> → copy the slug.
+  lever:
+    enabled: true
+    locations: ["remote", "india", "bangalore", "hyderabad", "pune", "mumbai", "delhi",
+                "united states", "uk", "germany"]
+    companies:
+      - "netflix"
+      - "github"
+      - "palantir"
+      - "scale"
+      - "rippling"
+      - "matterport"
+      - "mixpanel"
+      - "kong"
+      - "kraken"
+      - "huggingface"
+      - "shoplazza"
+      - "zip"
+      - "leetcode"
+      - "linear"
+      - "thumbtack"
+      - "pavago"
+      - "attentive"
+      - "spotify"
+      - "blockchain"
+      - "lendingtree"
+      - "mercari"
+      - "fivetran"
+      - "razorpay"
+      - "stockholm"
+      - "mindbodyonline"
+      # Add more
+
+  # ── Y Combinator Work at a Startup ──────────────────────────────────────
+  ycombinator:
+    enabled: true
+    locations: ["remote", "india", "anywhere"]
+    max_pages: 4              # 4 pages ≈ 200 companies' jobs
+
+  # ── Naukri (India) ──────────────────────────────────────────────────────
+  # No login needed for scraping.
+  naukri:
+    enabled: true
+    locations: ["india", "bangalore", "hyderabad", "pune", "mumbai", "delhi", "remote"]
+    experience_years: 1
+    max_per_keyword: 30
+
+
+  # ════ GOOD: free aggregators, larger volume ═══════════════════════════
+
+  wellfound:
+    enabled: true
+    markets: ["Remote", "India"]
+
+  weworkremotely:
+    enabled: true
+
+  # HOW TO GET Indeed cookie (optional — only for applying through Indeed):
+  #   F12 → Cookies → indeed.com → copy SOCK or IND cookie value
+  indeed:
+    enabled: true
+    session_cookie: ""
+    locations: ["Remote", "India"]
+
+
+  # ════ OK: often paywalled or low signal ══════════════════════════════
+
+  remoteok:
+    enabled: false
+    tags: ["python", "react", "node", "fullstack", "sql", "ai", "ml", "devops"]
+
+  remotive:
+    enabled: true
+    categories: ["software-dev", "data", "devops-sysadmin"]
+
+
+# ─── Resume Optimizer ───────────────────────────────────────────────────
+resume:
+  input_path: "resumes/my_resume.pdf"
+  output_dir: "resumes/generated"
+  template: "modern"          # modern | minimal | ats_clean
+
+  generate_portfolio_projects: true
+  max_portfolio_projects: 2   # 1 small (~1 week) + 1 large (~1 month)
+
+  # conservative — keyword polish only
+  # balanced     — expand adjacent skills
+  # aggressive   — full ATS optimization (default)
+  optimization_level: "aggressive"
+
+
+# ─── Application Settings ───────────────────────────────────────────────
+apply:
+  min_delay: 8
+  max_delay: 25
+
+  default_answers:
+    years_experience: "1"
+    authorized_to_work: "Yes"
+    require_sponsorship: "Yes"
+    willing_to_relocate: "Yes"
+    available_start: "1 month"
+    salary_expectation: ""         # Leave blank → uses expected_salary_min
+
+
+# ─── Notifications ──────────────────────────────────────────────────────
+notifications:
+  desktop: true
+  log_file: "data/applications.log"
